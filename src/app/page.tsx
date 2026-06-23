@@ -66,14 +66,18 @@ const NO_TAGS = [
 ];
 
 const DAILY_NUGGETS = [
-  { type: "challenge", title: "Parenting is repetitive", body: "Much of early parenting is made of tiny, unseen tasks. The beauty and the boredom often sit right next to each other." },
-  { type: "joy", title: "Small rituals matter", body: "Many parents say their favorite memories are simple rituals — bedtime stories, shared breakfasts, or walks to school." },
-  { type: "challenge", title: "Identity shape-shifting", body: "For some, becoming a parent blurs career, self, and caregiving. That shift can feel grounding, disorienting, or both." },
-  { type: "joy", title: "Seeing the world again", body: "Experiencing the world through a child's eyes can make small things — like puddles, birds, and buses — feel newly vivid." },
-  { type: "challenge", title: "Sleep changes everything", body: "Sleep deprivation in early parenthood is real and profound. Many parents say it's the hardest thing they didn't anticipate." },
+  { type: "joy", title: "Autonomy & Freedom", body: "The most cited reason to remain childfree is the desire to maintain independence and allocate time, energy, and resources freely." },
+  { type: "challenge", title: "The Motherhood Penalty", body: "For women, having children often results in a documented drop in lifetime earnings, while childless women report higher financial stability." },
+  { type: "joy", title: "Lack of Innate Desire", body: "Many childfree adults simply report never feeling the 'biological clock.' They do not dislike children; they just do not want to raise them." },
+  { type: "challenge", title: "The Happiness Penalty", body: "Sociological studies show that marital and personal happiness often drops significantly after the birth of the first child." },
+  { type: "challenge", title: "The Physical Toll", body: "Pregnancy is often romanticized, but it is a massive medical event that places extreme strain on the human body." },
+  { type: "challenge", title: "Loving the Child, Hating the Role", body: "Most parents who express regret still love their children deeply. What they regret is the role of being a parent and its limitations." },
+  { type: "challenge", title: "Loss of Identity", body: "The transition to parenthood requires putting one's needs second. Many struggle with the feeling that they have lost their individuality." },
+  { type: "challenge", title: "Lack of 'The Village'", body: "Modern parenting is highly isolated. Studies show that parental regret is highest among those who lack community resources." },
+  { type: "challenge", title: "Unmet Expectations", body: "Regret often stems from the massive gap between the societal expectation of parenting and the actual exhausting lived reality." },
+  { type: "joy", title: "Watching someone become", body: "Watching a child develop their own personality, humor, and views is something parents often describe as the quiet gift of the journey." },
+  { type: "challenge", title: "Environmental Concerns", body: "An increasing number of people cite climate change and global instability as ethical reasons to abstain from bringing new life into the world." },
   { type: "joy", title: "Unconditional bonds", body: "The specific love between parent and child is described by many as unlike anything they've experienced — quiet, overwhelming, and ordinary all at once." },
-  { type: "challenge", title: "The mental load is heavy", body: "Parenting involves a constant background hum of planning, worrying, and coordinating that rarely gets acknowledged." },
-  { type: "joy", title: "Watching someone become", body: "Watching a person develop their own personality, humor, and views is something parents often describe as the quiet gift of the whole journey." },
 ];
 
 function isSameLocalDay(dateA: Date, dateB: Date): boolean {
