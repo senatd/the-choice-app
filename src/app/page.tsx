@@ -47,7 +47,6 @@ type CheckIn = {
 
 const GENERAL_TAGS = [
   "Partner dynamics",
-  "Hormonal / cycle",
   "Energy levels",
   "Family pressure",
 ];
@@ -57,6 +56,7 @@ const YES_TAGS = [
   "Nesting instinct",
   "Feeling maternal",
   "Financial confidence",
+  "Craving family",
 ];
 
 const NO_TAGS = [
@@ -65,6 +65,9 @@ const NO_TAGS = [
   "World anxiety",
   "Financial anxiety",
   "Enjoying quiet",
+  "Physical toll fear",
+  "Loss of identity",
+  "Mental load",
 ];
 
 
