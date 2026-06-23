@@ -44,5 +44,6 @@ export const DAILY_NUGGETS = [
   { type: "challenge", title: "The Sleep Deficit", body: "In the first year of a child's life, parents lose an average of 109 hours of sleep, which profoundly impacts memory, mood, and immune function." },
   { type: "challenge", title: "The Financial Tax", body: "The USDA estimates that the average cost of raising a child to age 18 in a middle-income family exceeds $300,000, not including college tuition." },
   { type: "challenge", title: "Paternal Depression", body: "Postpartum depression isn't just for mothers. Research indicates that up to 10% of new fathers experience paternal depression, often triggered by stress and sleep deprivation." },
-  { type: "joy", title: "The Toddler Brain", body: "A toddler's brain has twice as many neural connections as an adult's. They are literal learning machines, which is why their curiosity is so exhausting but miraculous to witness." }
+  { type: "joy", title: "The Toddler Brain", body: "A toddler's brain has twice as many neural connections as an adult's. They are literal learning machines, which is why their curiosity is so exhausting but miraculous to witness." },
+  { type: "challenge", title: "Permanent Foot Growth", body: "Due to the release of the hormone relaxin (which loosens ligaments) and the extra weight carried during pregnancy, up to 70% of women experience flattened arches that cause their feet to permanently grow by a half to a full shoe size." }
 ];
