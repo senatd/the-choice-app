@@ -338,8 +338,8 @@ export default function InsightsPage() {
                       tickFormatter={(v) => v === 100 ? "Yes" : v === 50 ? "Unsure" : v === 0 ? "No" : ""}
                     />
                     <Tooltip
-                      formatter={(value: number) => [
-                        value >= 80 ? "Strongly Yes" : value >= 60 ? "Leaning Yes" : value >= 40 ? "Unsure/Mixed" : value >= 20 ? "Leaning No" : "Strongly No", 
+                      formatter={(value: any) => [
+                        typeof value === 'number' ? (value >= 80 ? "Strongly Yes" : value >= 60 ? "Leaning Yes" : value >= 40 ? "Unsure/Mixed" : value >= 20 ? "Leaning No" : "Strongly No") : "No Data", 
                         "Current Trend"
                       ]}
                       contentStyle={{
