@@ -180,6 +180,17 @@ export default function Home() {
     return [...allBuiltIn, ...extras];
   }, [draftDesire, customTags]);
 
+  const handleDesireChange = (newDesire: Desire) => {
+    setDraftDesire(newDesire);
+    // When switching desires, remove any selected tags that belong to the opposing context
+    const validTagsForNewDesire = newDesire === "yes" ? YES_TAGS : newDesire === "no" ? NO_TAGS : [];
+    const allValidBuiltIn = [...validTagsForNewDesire, ...GENERAL_TAGS];
+    
+    setSelectedTags(prev => prev.filter(tag => 
+      allValidBuiltIn.includes(tag) || (customTags.includes(tag) && !YES_TAGS.includes(tag) && !NO_TAGS.includes(tag))
+    ));
+  };
+
   const handleSaveCheckIn = async (desire: Desire) => {
     if (!desire || !user) return;
     setIsSaving(true);
@@ -331,7 +342,7 @@ export default function Home() {
                         <Button
                           variant={draftDesire === "yes" ? "default" : "outline"}
                           className="w-full justify-center gap-2"
-                          onClick={() => setDraftDesire("yes")}
+                          onClick={() => handleDesireChange("yes")}
                           disabled={isSaving}
                         >
                           <Heart className="h-4 w-4" />
@@ -340,7 +351,7 @@ export default function Home() {
                         <Button
                           variant={draftDesire === "no" ? "default" : "outline"}
                           className="w-full justify-center gap-2"
-                          onClick={() => setDraftDesire("no")}
+                          onClick={() => handleDesireChange("no")}
                           disabled={isSaving}
                         >
                           <Star className="h-4 w-4" />
@@ -349,7 +360,7 @@ export default function Home() {
                         <Button
                           variant={draftDesire === "undecided" ? "default" : "outline"}
                           className="w-full justify-center"
-                          onClick={() => setDraftDesire("undecided")}
+                          onClick={() => handleDesireChange("undecided")}
                           disabled={isSaving}
                         >
                           Unsure
