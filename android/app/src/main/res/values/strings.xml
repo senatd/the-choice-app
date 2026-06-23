@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">the Choice</string>
+    <string name="title_activity_main">the Choice</string>
+    <string name="package_name">com.babychoice.app</string>
+    <string name="custom_url_scheme">com.babychoice.app</string>
+</resources>

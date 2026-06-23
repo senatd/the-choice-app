@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fdfbf7;
+  --foreground: #3f3a33;
+  --sage: #8a9a5b;
+  --sage-soft: #c3cf96;
+  --terracotta: #c46a4a;
+  --terracotta-soft: #f2c2ad;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-playfair);
+}
+
+body {
+  min-height: 100vh;
+  background: radial-gradient(circle at top left, #ffffff 0, #fdfbf7 40%, #f3ede2 100%);
+  color: var(--foreground);
+  font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont,
+    "SF Pro Text", "SF Pro Display", sans-serif;
+
+  /* ── Mobile native feel ── */
+  /* Prevent rubbery overscroll on Android / Safari */
+  overscroll-behavior: none;
+  /* Prevent content from rendering behind iPhone notch/home bar */
+  padding-top: env(safe-area-inset-top);
+}
+
+.heading-serif {
+  font-family: var(--font-playfair), "Playfair Display", ui-serif, Georgia,
+    "Times New Roman", serif;
+}
+
+.paper-surface {
+  background: radial-gradient(circle at top, #ffffff 0, #fbf7ee 40%, #f3ede2 100%);
+}
+
+.soft-shadow {
+  box-shadow:
+    0 18px 45px rgba(63, 58, 51, 0.07),
+    0 2px 8px rgba(63, 58, 51, 0.03);
+}
+
+/* ── Mobile native feel (global) ── */
+
+/* Remove grey tap flash on all interactive elements (iOS Safari) */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent accidental text selection on buttons and nav */
+button,
+nav,
+a {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Smooth momentum scrolling in scrollable areas (iOS) */
+.overflow-y-auto,
+.overflow-auto,
+main {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* iPhone home indicator safe area padding helper */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Combined bottom nav safe area */
+.nav-safe-bottom {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
+}
