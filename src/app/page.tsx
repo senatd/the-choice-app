@@ -176,6 +176,7 @@ export default function Home() {
 
   // Build the tag list for the dialog — decision-aware + general + custom tags
   const dialogTags = useMemo(() => {
+    if (draftDesire === "undecided" || !draftDesire) return customTags;
     const contextTags = draftDesire === "yes" ? YES_TAGS : draftDesire === "no" ? NO_TAGS : [];
     const allBuiltIn = [...contextTags, ...GENERAL_TAGS];
     // Add custom tags that aren't already in the list
@@ -186,6 +187,12 @@ export default function Home() {
   const handleDesireChange = (newDesire: Desire) => {
     setDraftDesire(newDesire);
     // When switching desires, remove any selected tags that belong to the opposing context
+    if (newDesire === "undecided") {
+      // Clear all built-in tags if switching to unsure
+      setSelectedTags(prev => prev.filter(tag => customTags.includes(tag) && !YES_TAGS.includes(tag) && !NO_TAGS.includes(tag) && !GENERAL_TAGS.includes(tag)));
+      return;
+    }
+
     const validTagsForNewDesire = newDesire === "yes" ? YES_TAGS : newDesire === "no" ? NO_TAGS : [];
     const allValidBuiltIn = [...validTagsForNewDesire, ...GENERAL_TAGS];
     
@@ -374,36 +381,38 @@ export default function Home() {
                         <p className="text-[0.7rem] text-[#C46A4A]">{saveError}</p>
                       )}
 
-                      <div className="space-y-2">
-                        <p className="text-xs font-medium uppercase tracking-[0.18em] text-emerald-900/80">
-                          Context tags
-                        </p>
-                        <p className="text-xs text-emerald-900/80">
-                          If you&apos;d like, tag what might be shaping today&apos;s
-                          feeling.
-                        </p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {dialogTags.map((tag) => {
-                            const active = selectedTags.includes(tag);
-                            const isCustom = customTags.includes(tag) && !GENERAL_TAGS.includes(tag) && !YES_TAGS.includes(tag) && !NO_TAGS.includes(tag);
-                            return (
-                              <button
-                                key={tag}
-                                type="button"
-                                onClick={() => handleToggleTag(tag)}
-                                className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-50 rounded-full"
-                              >
-                                <Badge
-                                  active={active}
-                                  variant={active ? "solid" : isCustom ? "muted" : "outline"}
+                      {dialogTags.length > 0 && (
+                        <div className="space-y-2">
+                          <p className="text-xs font-medium uppercase tracking-[0.18em] text-emerald-900/80">
+                            Context tags
+                          </p>
+                          <p className="text-xs text-emerald-900/80">
+                            If you&apos;d like, tag what might be shaping today&apos;s
+                            feeling.
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {dialogTags.map((tag) => {
+                              const active = selectedTags.includes(tag);
+                              const isCustom = customTags.includes(tag) && !GENERAL_TAGS.includes(tag) && !YES_TAGS.includes(tag) && !NO_TAGS.includes(tag);
+                              return (
+                                <button
+                                  key={tag}
+                                  type="button"
+                                  onClick={() => handleToggleTag(tag)}
+                                  className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-50 rounded-full"
                                 >
-                                  {isCustom && "✦ "}{tag}
-                                </Badge>
-                              </button>
-                            );
-                          })}
+                                  <Badge
+                                    active={active}
+                                    variant={active ? "solid" : isCustom ? "muted" : "outline"}
+                                  >
+                                    {isCustom && "✦ "}{tag}
+                                  </Badge>
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
+                      )}
 
                       <div className="space-y-2">
                         <label htmlFor="notes" className="text-xs font-medium uppercase tracking-[0.18em] text-emerald-900/80">
