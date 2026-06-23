@@ -88,31 +88,44 @@ export default function InsightsPage() {
     };
   }, [checkIns]);
 
-  // Trend: rolling 7-day yes% over last 30 days
+  // Trend: rolling 7-day desire score over last 30 days
   const trendData = useMemo(() => {
     if (checkIns.length < 3) return [];
 
-    const last30 = checkIns.filter(c => {
-      const d = new Date(c.created_at);
-      const cutoff = new Date();
-      cutoff.setDate(cutoff.getDate() - 30);
-      return d >= cutoff;
-    });
+    const data = [];
+    const now = new Date();
+    // Generate the last 30 days in order
+    for (let i = 29; i >= 0; i--) {
+      const targetDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i, 23, 59, 59);
+      const windowStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate() - 6, 0, 0, 0);
 
-    // Group by day label
-    const byDate: Record<string, { yes: number; no: number; total: number }> = {};
-    last30.forEach(c => {
-      const label = new Date(c.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" });
-      if (!byDate[label]) byDate[label] = { yes: 0, no: 0, total: 0 };
-      byDate[label].total++;
-      if (c.decision === "yes") byDate[label].yes++;
-      if (c.decision === "no") byDate[label].no++;
-    });
+      // Find all check-ins in this 7-day window
+      const windowCheckIns = checkIns.filter(c => {
+        const d = new Date(c.created_at);
+        return d >= windowStart && d <= targetDate;
+      });
 
-    return Object.entries(byDate).map(([date, val]) => ({
-      date,
-      "Yes %": val.total > 0 ? Math.round((val.yes / (val.yes + val.no || 1)) * 100) : null,
-    }));
+      if (windowCheckIns.length > 0) {
+        let scoreSum = 0;
+        windowCheckIns.forEach(c => {
+          if (c.decision === "yes") scoreSum += 100;
+          else if (c.decision === "undecided") scoreSum += 50;
+          // no is 0, so adds nothing
+        });
+        const avg = Math.round(scoreSum / windowCheckIns.length);
+        data.push({
+          date: targetDate.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+          Trend: avg,
+        });
+      } else {
+        // If no check-ins in the last 7 days, return null so Recharts connects the gap smoothly
+        data.push({
+          date: targetDate.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+          Trend: null,
+        });
+      }
+    }
+    return data;
   }, [checkIns]);
 
   // Consistency stats
@@ -303,7 +316,7 @@ export default function InsightsPage() {
                   <TrendingUp className="h-4 w-4 text-[#8A9A5B]" />
                   Your Trend
                 </CardTitle>
-                <CardDescription>How your Yes % has shifted over the last 30 days.</CardDescription>
+                <CardDescription>A 7-day rolling average of your feelings over the last 30 days.</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={180}>
@@ -318,13 +331,17 @@ export default function InsightsPage() {
                     />
                     <YAxis
                       domain={[0, 100]}
+                      ticks={[0, 50, 100]}
                       tick={{ fontSize: 10, fill: "#9A9184" }}
                       tickLine={false}
                       axisLine={false}
-                      tickFormatter={(v) => `${v}%`}
+                      tickFormatter={(v) => v === 100 ? "Yes" : v === 50 ? "Unsure" : v === 0 ? "No" : ""}
                     />
                     <Tooltip
-                      formatter={(value) => [`${value}%`, "Yes"]}
+                      formatter={(value: number) => [
+                        value >= 80 ? "Strongly Yes" : value >= 60 ? "Leaning Yes" : value >= 40 ? "Unsure/Mixed" : value >= 20 ? "Leaning No" : "Strongly No", 
+                        "Current Trend"
+                      ]}
                       contentStyle={{
                         background: "#FDFBF7",
                         border: "1px solid #DDD6CB",
@@ -336,7 +353,7 @@ export default function InsightsPage() {
                     />
                     <Line
                       type="monotone"
-                      dataKey="Yes %"
+                      dataKey="Trend"
                       stroke="#8A9A5B"
                       strokeWidth={2}
                       dot={{ fill: "#8A9A5B", r: 3, strokeWidth: 0 }}
