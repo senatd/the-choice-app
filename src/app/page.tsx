@@ -46,7 +46,6 @@ type CheckIn = {
 };
 
 const GENERAL_TAGS = [
-  "Career focus",
   "Partner dynamics",
   "Hormonal / cycle",
   "Energy levels",
@@ -61,6 +60,7 @@ const YES_TAGS = [
 ];
 
 const NO_TAGS = [
+  "Career focus",
   "Valuing freedom",
   "World anxiety",
   "Financial anxiety",
