@@ -304,17 +304,13 @@ export default function HistoryPage() {
               <div className="flex justify-center">
                 {selectedCheckIn.decision === "yes" && (
                   <div className="flex flex-col items-center gap-2 text-emerald-900">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[color:var(--sage-soft)]/40">
-                      <Heart className="h-6 w-6 text-[#8A9A5B] fill-current" />
-                    </div>
+                    <img src="/icon-yes.png" alt="Yes" className="h-14 w-14 object-contain drop-shadow-sm" />
                     <span className="heading-serif font-medium">Leaning Yes</span>
                   </div>
                 )}
                 {selectedCheckIn.decision === "no" && (
-                  <div className="flex flex-col items-center gap-2 text-[#3A6070]">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#D9E8EE]/70">
-                      <Star className="h-6 w-6 text-[#7DA3B5] fill-current" />
-                    </div>
+                  <div className="flex flex-col items-center gap-2 text-[#6F685E]">
+                    <img src="/icon-no.png" alt="No" className="h-14 w-14 object-contain drop-shadow-sm" />
                     <span className="heading-serif font-medium">Leaning No</span>
                   </div>
                 )}
