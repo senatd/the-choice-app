@@ -216,7 +216,7 @@ export default function InsightsPage() {
                   style={{ width: `${balance.yesPercent}%` }}
                 />
                 <div
-                  className="absolute right-0 top-0 h-full rounded-full bg-gradient-to-l from-[#7DA3B5] to-[#D9E8EE] transition-all duration-700"
+                  className="absolute right-0 top-0 h-full rounded-full bg-gradient-to-l from-[#EAB308] to-[#FEF08A] transition-all duration-700"
                   style={{ width: `${balance.noPercent}%` }}
                 />
               </div>
@@ -229,7 +229,7 @@ export default function InsightsPage() {
                 <div className="flex items-center gap-1.5">
                   <span>{balance.noPercent}%</span>
                   <span>No ({balance.no} days)</span>
-                  <Star className="h-3 w-3 text-[#7DA3B5] fill-current" />
+                  <Star className="h-3 w-3 text-[#EAB308] fill-current" />
                 </div>
               </div>
             </CardContent>
@@ -282,7 +282,7 @@ export default function InsightsPage() {
               <Card className="bg-white/80 border border-[color:var(--sage-soft)]/50">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-sm text-[#3F3A33]">
-                    <Star className="h-3.5 w-3.5 text-[#7DA3B5] fill-current" />
+                    <Star className="h-3.5 w-3.5 text-[#EAB308] fill-current" />
                     What drives your No
                   </CardTitle>
                 </CardHeader>
@@ -297,7 +297,7 @@ export default function InsightsPage() {
                       </div>
                       <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#E6DFD2]">
                         <div
-                          className="h-full rounded-full bg-gradient-to-r from-[#7DA3B5] to-[#D9E8EE] transition-all duration-500"
+                          className="h-full rounded-full bg-gradient-to-r from-[#EAB308] to-[#FEF08A] transition-all duration-500"
                           style={{ width: `${Math.max(6, percent)}%` }}
                         />
                       </div>

@@ -578,7 +578,7 @@ function Bar({ label, value, tone }: BarProps) {
     tone === "yes"
       ? "from-[color:var(--sage)] via-[color:var(--sage-soft)] to-[#FDFBF7]"
       : tone === "no"
-      ? "from-[#7DA3B5] via-[#D9E8EE] to-[#FDFBF7]"
+      ? "from-[#EAB308] via-[#FEF08A] to-[#FDFBF7]"
       : "from-[#D7CFBF] via-[#F3EDE2] to-[#FFFFFF]";
   return (
     <div className="space-y-1">
