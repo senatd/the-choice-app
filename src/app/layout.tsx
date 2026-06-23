@@ -15,9 +15,9 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "The Choice · Daily Fertility Feelings",
+  title: "The Choice",
   description:
-    "A calm, reflective space for women undecided about motherhood to track daily desire alongside their cycles.",
+    "A quiet account for a question that doesn't need quick answers.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
