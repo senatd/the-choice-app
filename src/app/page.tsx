@@ -66,6 +66,12 @@ const NO_TAGS = [
 ];
 
 const DAILY_NUGGETS = [
+  { type: "challenge", title: "Parenting is repetitive", body: "Much of early parenting is made of tiny, unseen tasks. The beauty and the boredom often sit right next to each other." },
+  { type: "joy", title: "Small rituals matter", body: "Many parents say their favorite memories are simple rituals — bedtime stories, shared breakfasts, or walks to school." },
+  { type: "challenge", title: "Identity shape-shifting", body: "For some, becoming a parent blurs career, self, and caregiving. That shift can feel grounding, disorienting, or both." },
+  { type: "joy", title: "Seeing the world again", body: "Experiencing the world through a child's eyes can make small things — like puddles, birds, and buses — feel newly vivid." },
+  { type: "challenge", title: "Sleep changes everything", body: "Sleep deprivation in early parenthood is real and profound. Many parents say it's the hardest thing they didn't anticipate." },
+  { type: "challenge", title: "The mental load is heavy", body: "Parenting involves a constant background hum of planning, worrying, and coordinating that rarely gets acknowledged." },
   { type: "joy", title: "Autonomy & Freedom", body: "The most cited reason to remain childfree is the desire to maintain independence and allocate time, energy, and resources freely." },
   { type: "challenge", title: "The Motherhood Penalty", body: "For women, having children often results in a documented drop in lifetime earnings, while childless women report higher financial stability." },
   { type: "joy", title: "Lack of Innate Desire", body: "Many childfree adults simply report never feeling the 'biological clock.' They do not dislike children; they just do not want to raise them." },
