@@ -338,6 +338,7 @@ export default function InsightsPage() {
                       tickFormatter={(v) => v === 100 ? "Yes" : v === 50 ? "Unsure" : v === 0 ? "No" : ""}
                     />
                     <Tooltip
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       formatter={(value: any) => [
                         typeof value === 'number' ? (value >= 80 ? "Strongly Yes" : value >= 60 ? "Leaning Yes" : value >= 40 ? "Unsure/Mixed" : value >= 20 ? "Leaning No" : "Strongly No") : "No Data", 
                         "Current Trend"
@@ -373,7 +374,7 @@ export default function InsightsPage() {
                 <Flame className="h-4 w-4 text-[#8A9A5B]" />
                 Consistency
               </CardTitle>
-              <CardDescription>How regularly you've been showing up for yourself.</CardDescription>
+              <CardDescription>How regularly you&apos;ve been showing up for yourself.</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-3 gap-3">
