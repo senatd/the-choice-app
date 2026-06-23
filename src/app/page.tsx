@@ -576,9 +576,9 @@ type BarProps = { label: string; value: number; tone: "yes" | "no" | "undecided"
 function Bar({ label, value, tone }: BarProps) {
   const gradient =
     tone === "yes"
-      ? "from-[color:var(--sage)] via-[color:var(--sage-soft)] to-[#FDFBF7]"
+      ? "from-[#8A9A5B] via-[#E2E6D8] to-[#FDFBF7]"
       : tone === "no"
-      ? "from-[#E8C361] via-[#F5E0A5] to-[#FDFBF7]"
+      ? "from-[#7DA3B5] via-[#D9E8EE] to-[#FDFBF7]"
       : "from-[#D7CFBF] via-[#F3EDE2] to-[#FFFFFF]";
   return (
     <div className="space-y-1">
