@@ -27,6 +27,7 @@ export default function AuthPage() {
   const [resetSent, setResetSent] = useState(false);
   const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
   const [showLocalWarning, setShowLocalWarning] = useState(false);
+  const [isUpgrading, setIsUpgrading] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -41,6 +42,7 @@ export default function AuthPage() {
 
     if (typeof window !== "undefined" && window.location.search.includes("upgrade=true")) {
       setMode("signup");
+      setIsUpgrading(true);
     }
   }, [router]);
 
@@ -294,7 +296,7 @@ export default function AuthPage() {
         </Card>
 
         {/* ── Local Mode Entry ── */}
-        {!showLocalWarning && mode === "signup" && (
+        {!showLocalWarning && mode === "signup" && !isUpgrading && (
           <div className="text-center pt-4 border-t border-[color:var(--sage-soft)]/50 mt-6">
             <p className="text-[0.78rem] text-[#6F685E] mb-3">Prefer absolute privacy?</p>
             <button
