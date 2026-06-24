@@ -548,7 +548,7 @@ export default function Home() {
             <CardHeader>
               <CardTitle>Ground rules of this space</CardTitle>
               <CardDescription>
-                For women who are neither a firm yes nor a firm no.
+                For people who are neither a firm yes nor a firm no.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-[#3F3A33]">
