@@ -672,18 +672,23 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Email */}
-          <SettingRow icon={Mail} label="Email" sublabel={userEmail}>
-            <span className="text-xs text-[#9A9184]">read-only</span>
-          </SettingRow>
+          {/* Cloud-only account details */}
+          {storageMode === "cloud" && (
+            <>
+              {/* Email */}
+              <SettingRow icon={Mail} label="Email" sublabel={userEmail}>
+                <span className="text-xs text-[#9A9184]">read-only</span>
+              </SettingRow>
 
-          {/* Sign out */}
-          <button
-            onClick={() => void handleSignOut()}
-            className="w-full text-left transition-colors hover:bg-red-50/50 active:bg-red-50"
-          >
-            <SettingRow icon={LogOut} label="Sign out" danger />
-          </button>
+              {/* Sign out */}
+              <button
+                onClick={() => void handleSignOut()}
+                className="w-full text-left transition-colors hover:bg-red-50/50 active:bg-red-50"
+              >
+                <SettingRow icon={LogOut} label="Sign out" danger />
+              </button>
+            </>
+          )}
         </Section>
 
         {/* ── Daily Reminder (free) ── */}
