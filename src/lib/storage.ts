@@ -103,7 +103,7 @@ export const StorageService = {
   async getProfile(): Promise<UserProfile | null> {
     if (this.getMode() === "local") {
       const stored = localStorage.getItem("local_profile");
-      return stored ? JSON.parse(stored) : { id: "local-user", display_name: null, custom_tags: [], is_premium: true };
+      return stored ? JSON.parse(stored) : { id: "local-user", display_name: null, custom_tags: [], is_premium: false };
     } else {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
