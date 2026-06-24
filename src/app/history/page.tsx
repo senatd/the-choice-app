@@ -270,9 +270,9 @@ export default function HistoryPage() {
                         
                         let bg = "bg-[#F3EDE2]"; // Softer empty state
                         if (checkIn) {
-                          if (checkIn.decision === "yes") bg = "bg-[#8A9A5B]";
-                          else if (checkIn.decision === "no") bg = "bg-[#7DA3B5]";
-                          else bg = "bg-[#9A9184]";
+                          if (checkIn.decision === "yes") bg = "bg-[#C4D36A]"; // Matches pale green-yellow heart
+                          else if (checkIn.decision === "no") bg = "bg-[#F7D23E]"; // Matches bright yellow star
+                          else bg = "bg-[#B0AFA6]"; // Matches grey dot
                         } else if (isFuture) {
                           bg = "bg-transparent";
                         }
