@@ -222,7 +222,7 @@ export default function InsightsPage() {
               </div>
               <div className="flex justify-between text-xs text-[#6F685E]">
                 <div className="flex items-center gap-1.5">
-                  <img src="/icon-yes.png" alt="Yes" className="h-3 w-3 object-contain" />
+                  <Heart className="h-3 w-3 text-[#8A9A5B] fill-current" />
                   <span className="font-medium text-[#3F3A33]">{balance.yesPercent}%</span>
                   <span>Yes ({balance.yes} days)</span>
                 </div>
@@ -254,7 +254,7 @@ export default function InsightsPage() {
               <Card className="bg-white/80 border border-[color:var(--sage-soft)]/50">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-sm text-[#3F3A33]">
-                    <img src="/icon-yes.png" alt="Yes" className="h-3.5 w-3.5 object-contain" />
+                    <Heart className="h-3.5 w-3.5 text-[#8A9A5B] fill-current" />
                     What drives your Yes
                   </CardTitle>
                 </CardHeader>
