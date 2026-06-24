@@ -281,7 +281,7 @@ export default function AuthPage() {
         </Card>
 
         {/* ── Local Mode Entry ── */}
-        {!showLocalWarning && (
+        {!showLocalWarning && mode === "signup" && (
           <div className="text-center pt-4 border-t border-[color:var(--sage-soft)]/50 mt-6">
             <p className="text-[0.78rem] text-[#6F685E] mb-3">Prefer absolute privacy?</p>
             <button
