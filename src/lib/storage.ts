@@ -139,5 +139,34 @@ export const StorageService = {
       await supabase.rpc('delete_user');
       await supabase.auth.signOut();
     }
+  },
+
+  async uploadLocalDataToCloud(userId: string): Promise<void> {
+    const localCheckInsStr = localStorage.getItem("local_checkins");
+    if (localCheckInsStr) {
+      const checkIns = JSON.parse(localCheckInsStr) as CheckIn[];
+      for (const c of checkIns) {
+        // For local IDs that might be like 'local-123', we can let Supabase generate a UUID
+        // But if they are UUIDs, upsert is fine. The safest is to insert without ID so Postgres handles UUID.
+        await supabase.from("daily_checkins").insert({ 
+          user_id: userId,
+          decision: c.decision, 
+          tags: c.tags, 
+          notes: c.notes,
+          created_at: c.created_at
+        });
+      }
+    }
+    const localProfileStr = localStorage.getItem("local_profile");
+    if (localProfileStr) {
+      const profile = JSON.parse(localProfileStr);
+      await supabase.from("profiles").update({
+        display_name: profile.display_name,
+        custom_tags: profile.custom_tags
+      }).eq("id", userId);
+    }
+    // Clear local data after migration
+    localStorage.removeItem("local_checkins");
+    localStorage.removeItem("local_profile");
   }
 };

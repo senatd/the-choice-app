@@ -189,6 +189,7 @@ export default function SettingsPage() {
   const [storageMode, setStorageMode] = useState<StorageMode>("cloud");
   const [showDowngradeModal, setShowDowngradeModal] = useState(false);
   const [isDowngrading, setIsDowngrading] = useState(false);
+  const [isUpgrading, setIsUpgrading] = useState(false);
 
   // Advanced insights toggle
   const [advancedInsights, setAdvancedInsights] = useState(false);
@@ -234,6 +235,28 @@ export default function SettingsPage() {
       toast.error("Couldn't save name");
     }
     setIsSavingName(false);
+  }
+
+  async function handleUpgrade() {
+    setIsUpgrading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // They are already logged into a cloud account but mode is local.
+        // Migrate their local data up, then switch mode.
+        await StorageService.uploadLocalDataToCloud(user.id);
+        StorageService.setMode("cloud");
+        setStorageMode("cloud");
+        setUserEmail(user.email ?? "");
+        toast.success("Local data synced to your Cloud account!");
+      } else {
+        // Redirect to auth to sign in/up, passing a query param so auth page knows to migrate
+        router.push("/auth?upgrade=true");
+      }
+    } catch (e) {
+      toast.error("Failed to upgrade");
+    }
+    setIsUpgrading(false);
   }
 
   async function handleDowngrade() {
@@ -874,7 +897,8 @@ export default function SettingsPage() {
            </div>
            {storageMode === "local" ? (
              <button
-                onClick={() => router.push("/auth?upgrade=true")}
+                onClick={() => void handleUpgrade()}
+                disabled={isUpgrading}
                 className="w-full text-left transition-colors hover:bg-[#F5F0E8] active:bg-[#EDE8DF]"
               >
                 <SettingRow
@@ -882,7 +906,11 @@ export default function SettingsPage() {
                   label="Upgrade to Cloud Sync"
                   sublabel="Back up your data across devices"
                 >
-                  <ChevronRight className="h-4 w-4 text-[#9A9184]" />
+                  {isUpgrading ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-[#9A9184]" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-[#9A9184]" />
+                  )}
                 </SettingRow>
               </button>
            ) : (

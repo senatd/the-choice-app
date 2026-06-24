@@ -62,11 +62,15 @@ export default function AuthPage() {
       }
 
       if (mode === "login") {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         if (signInError) throw signInError;
+
+        if (window.location.search.includes("upgrade=true") && data.user) {
+          await StorageService.uploadLocalDataToCloud(data.user.id);
+        }
 
         toast.success("Welcome back", {
           description: "You’re back in your space.",
@@ -89,11 +93,16 @@ export default function AuthPage() {
           return; // Don't redirect, show the verification message
         }
 
+        if (window.location.search.includes("upgrade=true") && data.user) {
+          await StorageService.uploadLocalDataToCloud(data.user.id);
+        }
+
         toast.success("Account created", {
           description: "We’ve set aside a space just for you.",
         });
       }
 
+      StorageService.setMode("cloud");
       router.replace("/");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
