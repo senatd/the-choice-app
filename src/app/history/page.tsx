@@ -94,6 +94,40 @@ export default function HistoryPage() {
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const paddingDays = Array.from({ length: firstDay }, (_, i) => i);
 
+  // Generate 52 weeks of dates for the heatmap
+  const heatmapWeeks = useMemo(() => {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const dayOfWeek = today.getDay(); // 0 is Sunday, 6 is Saturday
+    const daysToEndOfWeek = 6 - dayOfWeek;
+    const endDate = new Date(today);
+    endDate.setDate(endDate.getDate() + daysToEndOfWeek);
+    
+    // We want 52 weeks (364 days)
+    const startDate = new Date(endDate);
+    startDate.setDate(startDate.getDate() - 363);
+
+    const weeks = [];
+    let current = new Date(startDate);
+    for (let i = 0; i < 52; i++) {
+      const week = [];
+      let monthLabel = null;
+      for (let j = 0; j < 7; j++) {
+        if (current.getDate() === 1) {
+          monthLabel = current.toLocaleDateString('en-US', { month: 'short' });
+        }
+        week.push(new Date(current));
+        current.setDate(current.getDate() + 1);
+      }
+      // If it's the very first week, always show the month label
+      if (i === 0 && !monthLabel) {
+         monthLabel = week[0].toLocaleDateString('en-US', { month: 'short' });
+      }
+      weeks.push({ days: week, monthLabel });
+    }
+    return weeks;
+  }, []);
+
   const journalEntries = useMemo(() => checkIns.filter(c => c.notes && c.notes.trim().length > 0), [checkIns]);
 
   if (isLoading) {
@@ -213,6 +247,51 @@ export default function HistoryPage() {
                 <span className="block h-1.5 w-1.5 rounded-full bg-[#9A9184]" /> Undecided
               </div>
             </div>
+            
+            {/* ── Heatmap Section ── */}
+            <div className="mt-10 pt-8 border-t border-[color:var(--sage-soft)]/50">
+              <h3 className="heading-serif text-md font-medium text-[#3F3A33] mb-8 text-center">
+                The Big Picture
+              </h3>
+              <div className="overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-[color:var(--sage-soft)] scrollbar-track-transparent flex flex-col">
+                <div className="flex gap-[4px] min-w-max mx-auto">
+                  {heatmapWeeks.map((week, i) => (
+                    <div key={i} className="flex flex-col gap-[4px] relative">
+                      {/* Month Label */}
+                      {week.monthLabel && (
+                        <div className="absolute -top-5 text-[0.55rem] font-medium text-[#9A9184] whitespace-nowrap">
+                          {week.monthLabel}
+                        </div>
+                      )}
+                      {/* Days */}
+                      {week.days.map((date, j) => {
+                        const checkIn = checkIns.find(c => isSameLocalDay(new Date(c.created_at), date));
+                        const isFuture = date > new Date();
+                        
+                        let bg = "bg-[#F3EDE2]"; // Softer empty state
+                        if (checkIn) {
+                          if (checkIn.decision === "yes") bg = "bg-[#8A9A5B]";
+                          else if (checkIn.decision === "no") bg = "bg-[#7DA3B5]";
+                          else bg = "bg-[#9A9184]";
+                        } else if (isFuture) {
+                          bg = "bg-transparent";
+                        }
+
+                        return (
+                          <div 
+                            key={j} 
+                            onClick={() => checkIn && handleDayClick(checkIn)}
+                            title={date.toDateString()}
+                            className={`w-[12px] h-[12px] rounded-[3px] transition-transform ${bg} ${checkIn ? "cursor-pointer hover:scale-125 shadow-sm" : "cursor-default"} ${isFuture ? "opacity-0" : ""}`}
+                          />
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
           </CardContent>
         </Card>
       ) : (
