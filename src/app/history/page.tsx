@@ -269,10 +269,19 @@ export default function HistoryPage() {
                         const isFuture = date > new Date();
                         
                         let bg = "bg-[#F3EDE2]"; // Softer empty state
+                        let content = null;
+
                         if (checkIn) {
-                          if (checkIn.decision === "yes") bg = "bg-[#C4D36A]"; // Matches pale green-yellow heart
-                          else if (checkIn.decision === "no") bg = "bg-[#F7D23E]"; // Matches bright yellow star
-                          else bg = "bg-[#B0AFA6]"; // Matches grey dot
+                          if (checkIn.decision === "yes") {
+                            bg = "bg-transparent";
+                            content = <img src="/icon-yes.png" alt="Yes" className="w-full h-full object-contain drop-shadow-sm scale-110" />;
+                          } else if (checkIn.decision === "no") {
+                            bg = "bg-transparent";
+                            content = <img src="/icon-no.png" alt="No" className="w-full h-full object-contain drop-shadow-sm scale-110" />;
+                          } else {
+                            // Undecided -> render identically to an empty state
+                            bg = "bg-[#F3EDE2]";
+                          }
                         } else if (isFuture) {
                           bg = "bg-transparent";
                         }
@@ -282,8 +291,10 @@ export default function HistoryPage() {
                             key={j} 
                             onClick={() => checkIn && handleDayClick(checkIn)}
                             title={date.toDateString()}
-                            className={`w-[12px] h-[12px] rounded-[3px] transition-transform ${bg} ${checkIn ? "cursor-pointer hover:scale-125 shadow-sm" : "cursor-default"} ${isFuture ? "opacity-0" : ""}`}
-                          />
+                            className={`w-[13px] h-[13px] rounded-[3px] flex items-center justify-center transition-transform ${bg} ${checkIn ? "cursor-pointer hover:scale-125 shadow-sm" : "cursor-default"} ${isFuture ? "opacity-0" : ""}`}
+                          >
+                            {content}
+                          </div>
                         );
                       })}
                     </div>
