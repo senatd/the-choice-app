@@ -38,6 +38,10 @@ export default function AuthPage() {
       }
     };
     void checkSession();
+
+    if (typeof window !== "undefined" && window.location.search.includes("upgrade=true")) {
+      setMode("signup");
+    }
   }, [router]);
 
   const confirmLocalEntry = () => {
