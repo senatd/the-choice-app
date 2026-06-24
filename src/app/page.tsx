@@ -11,6 +11,7 @@ import {
   Pencil,
   Check,
 } from "lucide-react";
+import { Haptics, ImpactStyle } from "@capacitor/haptics";
 import { Button } from "@/components/ui/button";
 import { BottomNav } from "@/components/BottomNav";
 import { DAILY_NUGGETS } from "@/lib/nuggets";
@@ -137,6 +138,38 @@ export default function Home() {
 
   useEffect(() => { void fetchData(); }, [fetchData]);
 
+  // Offline sync effect
+  useEffect(() => {
+    const syncOffline = async () => {
+      if (!navigator.onLine || !user) return;
+      const offlineStr = localStorage.getItem('offline_checkins');
+      if (offlineStr) {
+        const queue = JSON.parse(offlineStr);
+        if (queue.length > 0) {
+          try {
+            for (const item of queue) {
+              if (item.id.startsWith('temp-')) {
+                await supabase.from("daily_checkins").insert({ user_id: user.id, decision: item.decision, tags: item.tags, notes: item.notes });
+              } else {
+                await supabase.from("daily_checkins").update({ decision: item.decision, tags: item.tags, notes: item.notes }).eq("id", item.id);
+              }
+            }
+            localStorage.removeItem('offline_checkins');
+            toast.success("Offline check-ins synced to database ✓");
+            void fetchData();
+          } catch (e) {
+            console.error("Sync error", e);
+          }
+        }
+      }
+    };
+    
+    window.addEventListener('online', syncOffline);
+    if (user) syncOffline();
+    
+    return () => window.removeEventListener('online', syncOffline);
+  }, [user, fetchData]);
+
   // Open dialog pre-filled with today's data when editing
   const handleOpenDialog = (open: boolean) => {
     if (open && todayEntry) {
@@ -185,6 +218,7 @@ export default function Home() {
   }, [draftDesire, customTags]);
 
   const handleDesireChange = (newDesire: Desire) => {
+    Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
     setDraftDesire(newDesire);
     // When switching desires, remove any selected tags that belong to the opposing context
     if (newDesire === "undecided") {
@@ -207,6 +241,26 @@ export default function Home() {
     setSaveError(null);
 
     try {
+      if (!navigator.onLine) {
+        const offlineQueue = JSON.parse(localStorage.getItem('offline_checkins') || '[]');
+        const offlineEntry = { 
+          id: todayEntry?.id || 'temp-' + Date.now(), 
+          decision: desire, 
+          tags: selectedTags, 
+          notes: notes.trim() || null, 
+          created_at: todayEntry?.created_at || new Date().toISOString() 
+        };
+        offlineQueue.push(offlineEntry);
+        localStorage.setItem('offline_checkins', JSON.stringify(offlineQueue));
+        
+        setTodayEntry(offlineEntry as any);
+        if (!todayEntry) setHistory(prev => [{ decision: desire }, ...prev]);
+        
+        toast.success("Saved offline. Will sync when reconnected.");
+        setOpen(false);
+        return;
+      }
+
       if (todayEntry) {
         // UPDATE existing entry
         const { error } = await supabase

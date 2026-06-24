@@ -23,6 +23,56 @@ type CheckIn = {
   notes?: string | null;
 };
 
+function isSameLocalDay(dateA: Date, dateB: Date): boolean {
+  return (
+    dateA.getFullYear() === dateB.getFullYear() &&
+    dateA.getMonth() === dateB.getMonth() &&
+    dateA.getDate() === dateB.getDate()
+  );
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="rounded-xl border border-[color:var(--sage-soft)] bg-[#FDFBF7] p-3 text-sm shadow-md min-w-[150px]">
+        <p className="font-semibold text-[#3F3A33] mb-1">{label}</p>
+        <p className="text-[#8A9A5B] font-medium text-[0.75rem] mb-2">
+          Trend score: {data.Trend ?? "No data"}
+        </p>
+        
+        {data.decision && (
+          <div className="pt-2 border-t border-[color:var(--sage-soft)]/40 mt-1">
+            <p className="text-[0.65rem] uppercase tracking-wider text-[#8C8275] mb-1.5">Logged on this day</p>
+            <div className="flex items-center gap-2 mb-1.5">
+              {data.decision === "yes" && <img src="/icon-yes.png" alt="Yes" className="h-3.5 w-3.5 object-contain" />}
+              {data.decision === "no" && <img src="/icon-no.png" alt="No" className="h-3.5 w-3.5 object-contain" />}
+              {data.decision === "undecided" && <span className="block h-2.5 w-2.5 rounded-full bg-[#9A9184]" />}
+              <span className="capitalize text-[#3F3A33] font-medium text-xs">{data.decision}</span>
+            </div>
+            {data.tags && data.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {data.tags.map((t: string) => (
+                  <span key={t} className="bg-[color:var(--sage-soft)]/20 text-[#6F685E] text-[10px] px-1.5 py-0.5 rounded-sm">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            )}
+            {data.notes && (
+              <p className="text-[10px] text-[#8C8275] italic mt-1.5 line-clamp-3 leading-relaxed">
+                "{data.notes}"
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function InsightsPage() {
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -113,15 +163,23 @@ export default function InsightsPage() {
           // no is 0, so adds nothing
         });
         const avg = Math.round(scoreSum / windowCheckIns.length);
+        const exactDayCheckIn = windowCheckIns.find(c => isSameLocalDay(new Date(c.created_at), targetDate));
         data.push({
           date: targetDate.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
           Trend: avg,
+          tags: exactDayCheckIn?.tags || [],
+          decision: exactDayCheckIn?.decision,
+          notes: exactDayCheckIn?.notes
         });
       } else {
         // If no check-ins in the last 7 days, return null so Recharts connects the gap smoothly
+        const exactDayCheckIn = windowCheckIns.find(c => isSameLocalDay(new Date(c.created_at), targetDate));
         data.push({
           date: targetDate.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
           Trend: null,
+          tags: exactDayCheckIn?.tags || [],
+          decision: exactDayCheckIn?.decision,
+          notes: exactDayCheckIn?.notes
         });
       }
     }
@@ -338,18 +396,7 @@ export default function InsightsPage() {
                       tickFormatter={(v) => v === 100 ? "Yes" : v === 50 ? "Unsure" : v === 0 ? "No" : ""}
                     />
                     <Tooltip
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      formatter={(value: any) => [
-                        typeof value === 'number' ? (value >= 80 ? "Strongly Yes" : value >= 60 ? "Leaning Yes" : value >= 40 ? "Unsure/Mixed" : value >= 20 ? "Leaning No" : "Strongly No") : "No Data", 
-                        "Current Trend"
-                      ]}
-                      contentStyle={{
-                        background: "#FDFBF7",
-                        border: "1px solid #DDD6CB",
-                        borderRadius: "12px",
-                        fontSize: "12px",
-                        color: "#3F3A33",
-                      }}
+                      content={<CustomTooltip />}
                       cursor={{ stroke: "#8A9A5B", strokeWidth: 1, strokeDasharray: "4 2" }}
                     />
                     <Line

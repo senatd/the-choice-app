@@ -25,6 +25,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
+import { LocalNotifications } from "@capacitor/local-notifications";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -231,24 +232,63 @@ export default function SettingsPage() {
     router.replace("/auth");
   }
 
-  function handleReminderToggle(enabled: boolean) {
+  async function handleReminderToggle(enabled: boolean) {
     setRemindersEnabled(enabled);
     localStorage.setItem("reminder_enabled", String(enabled));
     if (enabled) {
-      // Request browser notification permission as a fallback
-      if (typeof window !== "undefined" && "Notification" in window) {
-        void Notification.requestPermission();
+      try {
+        let permStatus = await LocalNotifications.checkPermissions();
+        if (permStatus.display === "prompt") {
+          permStatus = await LocalNotifications.requestPermissions();
+        }
+        if (permStatus.display !== "granted") {
+          toast.error("Notification permission denied");
+          setRemindersEnabled(false);
+          localStorage.setItem("reminder_enabled", "false");
+          return;
+        }
+        await scheduleNotification(reminderTime);
+        toast.success("Reminder enabled!", { description: `We'll remind you at ${reminderTime} each day.` });
+      } catch (e) {
+        // Fallback for web
+        if (typeof window !== "undefined" && "Notification" in window) {
+          void Notification.requestPermission();
+        }
+        toast.success("Reminder enabled!", { description: `We'll remind you at ${reminderTime} each day.` });
       }
-      toast.success("Reminder enabled!", { description: `We'll remind you at ${reminderTime} each day.` });
     } else {
+      try {
+        await LocalNotifications.cancel({ notifications: [{ id: 1 }] });
+      } catch (e) {}
       toast("Reminder turned off");
     }
   }
 
-  function handleReminderTimeChange(time: string) {
+  async function scheduleNotification(time: string) {
+    const [hours, minutes] = time.split(":").map(Number);
+    try {
+      await LocalNotifications.cancel({ notifications: [{ id: 1 }] });
+      await LocalNotifications.schedule({
+        notifications: [
+          {
+            title: "Daily Check-in",
+            body: "Take a moment to reflect on how you feel today.",
+            id: 1,
+            schedule: {
+              on: { hour: hours, minute: minutes },
+              allowWhileIdle: true,
+            },
+          },
+        ],
+      });
+    } catch (e) {}
+  }
+
+  async function handleReminderTimeChange(time: string) {
     setReminderTime(time);
     localStorage.setItem("reminder_time", time);
     if (remindersEnabled) {
+      await scheduleNotification(time);
       toast.success("Reminder time updated", { description: `New time: ${time}` });
     }
   }
