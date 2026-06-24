@@ -8,7 +8,11 @@ import type { User } from "@supabase/supabase-js";
 import { 
   CalendarClock, 
   Loader2, 
-  BookOpen
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  Star
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +47,7 @@ export default function HistoryPage() {
   const [viewType, setViewType] = useState<"calendar" | "journal">("calendar");
   const router = useRouter();
 
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedCheckIn, setSelectedCheckIn] = useState<CheckIn | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -70,31 +75,24 @@ export default function HistoryPage() {
     setIsDialogOpen(true);
   };
 
-  // Generate 52 weeks of dates for the heatmap
-  const heatmapWeeks = useMemo(() => {
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    const dayOfWeek = today.getDay(); // 0 is Sunday, 6 is Saturday
-    const daysToEndOfWeek = 6 - dayOfWeek;
-    const endDate = new Date(today);
-    endDate.setDate(endDate.getDate() + daysToEndOfWeek);
-    
-    // We want 52 weeks (364 days)
-    const startDate = new Date(endDate);
-    startDate.setDate(startDate.getDate() - 363);
+  const nextMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+  };
 
-    const weeks = [];
-    let current = new Date(startDate);
-    for (let i = 0; i < 52; i++) {
-      const week = [];
-      for (let j = 0; j < 7; j++) {
-        week.push(new Date(current));
-        current.setDate(current.getDate() + 1);
-      }
-      weeks.push(week);
-    }
-    return weeks;
-  }, []);
+  const prevMonth = () => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+  };
+
+  const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
+  const getFirstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay();
+
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const daysInMonth = getDaysInMonth(year, month);
+  const firstDay = getFirstDayOfMonth(year, month);
+  
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  const paddingDays = Array.from({ length: firstDay }, (_, i) => i);
 
   const journalEntries = useMemo(() => checkIns.filter(c => c.notes && c.notes.trim().length > 0), [checkIns]);
 
@@ -148,55 +146,71 @@ export default function HistoryPage() {
       ) : viewType === "calendar" ? (
         <Card className="bg-white/80 border border-[color:var(--sage-soft)]/50">
           <CardHeader className="pb-4 pt-6 px-6">
-            <h2 className="heading-serif text-lg font-semibold text-[#3F3A33]">
-              The Last Year
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="heading-serif text-lg font-semibold text-[#3F3A33]">
+                {currentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+              </h2>
+              <div className="flex gap-2">
+                <button onClick={prevMonth} className="flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--sage-soft)] bg-white hover:bg-[color:var(--sage-soft)]/30 transition-colors">
+                  <ChevronLeft className="h-4 w-4 text-[#6F685E]" />
+                </button>
+                <button onClick={nextMonth} className="flex h-8 w-8 items-center justify-center rounded-full border border-[color:var(--sage-soft)] bg-white hover:bg-[color:var(--sage-soft)]/30 transition-colors">
+                  <ChevronRight className="h-4 w-4 text-[#6F685E]" />
+                </button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="px-6 pb-6">
-            <div className="overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-[color:var(--sage-soft)] scrollbar-track-transparent flex flex-col">
-              <div className="flex gap-1.5 min-w-max">
-                {heatmapWeeks.map((week, i) => (
-                  <div key={i} className="flex flex-col gap-1.5">
-                    {week.map((date, j) => {
-                      const checkIn = checkIns.find(c => isSameLocalDay(new Date(c.created_at), date));
-                      const isFuture = date > new Date();
-                      
-                      let bg = "bg-[#F0EBE0]/60";
-                      let border = "";
-                      if (checkIn) {
-                        if (checkIn.decision === "yes") bg = "bg-[#8A9A5B]";
-                        else if (checkIn.decision === "no") bg = "bg-[#7DA3B5]";
-                        else bg = "bg-[#9A9184]";
-                      } else if (!isFuture && date <= new Date()) {
-                        border = "border border-[#E6DFD2]";
-                        bg = "bg-transparent";
-                      } else if (isFuture) {
-                        bg = "bg-transparent opacity-30";
-                      }
+            <div className="grid grid-cols-7 gap-2 mb-2 text-center text-[0.7rem] font-medium text-[#9A9184] uppercase tracking-wider">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                <div key={day}>{day}</div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-2 gap-y-3">
+              {paddingDays.map(i => (
+                <div key={`padding-${i}`} className="h-10 sm:h-12" />
+              ))}
+              {days.map(day => {
+                const checkIn = checkIns.find(c => {
+                  const checkInDate = new Date(c.created_at);
+                  return checkInDate.getFullYear() === year &&
+                         checkInDate.getMonth() === month &&
+                         checkInDate.getDate() === day;
+                });
 
-                      return (
-                        <div 
-                          key={j} 
-                          onClick={() => checkIn && handleDayClick(checkIn)}
-                          title={date.toDateString()}
-                          className={`w-[14px] h-[14px] rounded-[3px] transition-transform ${bg} ${border} ${checkIn ? "cursor-pointer hover:scale-110 shadow-sm" : "cursor-default"}`}
-                        />
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
+                return (
+                  <button
+                    key={day}
+                    onClick={() => checkIn && handleDayClick(checkIn)}
+                    disabled={!checkIn}
+                    className={`flex flex-col items-center justify-start h-10 sm:h-12 rounded-xl transition-all relative ${
+                      checkIn 
+                        ? "cursor-pointer hover:bg-[#F3EDE2] active:scale-95" 
+                        : "opacity-50 cursor-default"
+                    }`}
+                  >
+                    <span className="text-[0.8rem] text-[#3F3A33] mb-1">{day}</span>
+                    {checkIn && (
+                      <div className="absolute bottom-1">
+                        {checkIn.decision === "yes" && <img src="/icon-yes.png" alt="Yes" className="h-4 w-4 object-contain" />}
+                        {checkIn.decision === "no" && <img src="/icon-no.png" alt="No" className="h-4 w-4 object-contain" />}
+                        {checkIn.decision === "undecided" && <span className="block h-2 w-2 rounded-full bg-[#9A9184] mb-1" />}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
             
             <div className="mt-6 flex flex-wrap justify-center gap-4 text-[0.65rem] text-[#8C8275] border-t border-[color:var(--sage-soft)]/30 pt-4">
               <div className="flex items-center gap-1.5">
-                <span className="block h-[10px] w-[10px] rounded-[2px] bg-[#8A9A5B]" /> Leaning Yes
+                <img src="/icon-yes.png" className="h-3.5 w-3.5 object-contain" alt="Yes" /> Leaning Yes
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="block h-[10px] w-[10px] rounded-[2px] bg-[#7DA3B5]" /> Leaning No
+                <img src="/icon-no.png" className="h-3.5 w-3.5 object-contain" alt="No" /> Leaning No
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="block h-[10px] w-[10px] rounded-[2px] bg-[#9A9184]" /> Undecided
+                <span className="block h-1.5 w-1.5 rounded-full bg-[#9A9184]" /> Undecided
               </div>
             </div>
           </CardContent>
