@@ -355,7 +355,7 @@ export default function Home() {
                           onClick={() => handleDesireChange("yes")}
                           disabled={isSaving}
                         >
-                          <Heart className="h-4 w-4" />
+                          <img src="/icon-yes.png" alt="Yes" className="h-4 w-4 object-contain" />
                           Yes
                         </Button>
                         <Button
