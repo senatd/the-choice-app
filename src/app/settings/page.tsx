@@ -265,7 +265,7 @@ export default function SettingsPage() {
       const checkIns = await StorageService.getCheckIns();
       const currentProfile = await StorageService.getProfile();
       
-      await StorageService.deleteData();
+      await supabase.auth.signOut(); // Just sign out, do not delete the account
       StorageService.setMode("local");
       
       localStorage.setItem("local_checkins", JSON.stringify(checkIns));
@@ -1007,7 +1007,7 @@ export default function SettingsPage() {
       <ConfirmModal
         isOpen={showDowngradeModal}
         title="Downgrade to Local Only?"
-        message="This will download all your cloud data to this device, and then permanently delete your cloud account from our servers."
+        message="This will download a copy of your cloud data to this device and sign you out. Your future check-ins will only be saved on this device. (Your cloud account will not be deleted)."
         confirmLabel="Downgrade to Local"
         onConfirm={() => void handleDowngrade()}
         onCancel={() => setShowDowngradeModal(false)}
