@@ -87,11 +87,19 @@ export default function HistoryPage() {
     let current = new Date(startDate);
     for (let i = 0; i < 52; i++) {
       const week = [];
+      let monthLabel = null;
       for (let j = 0; j < 7; j++) {
+        if (current.getDate() === 1) {
+          monthLabel = current.toLocaleDateString('en-US', { month: 'short' });
+        }
         week.push(new Date(current));
         current.setDate(current.getDate() + 1);
       }
-      weeks.push(week);
+      // If it's the very first week, always show the month label
+      if (i === 0 && !monthLabel) {
+         monthLabel = week[0].toLocaleDateString('en-US', { month: 'short' });
+      }
+      weeks.push({ days: week, monthLabel });
     }
     return weeks;
   }, []);
@@ -153,25 +161,36 @@ export default function HistoryPage() {
             </h2>
           </CardHeader>
           <CardContent className="px-6 pb-6">
-            <div className="overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-[color:var(--sage-soft)] scrollbar-track-transparent flex flex-col">
-              <div className="flex gap-1.5 min-w-max">
+            <div className="overflow-x-auto pb-6 scrollbar-thin scrollbar-thumb-[color:var(--sage-soft)] scrollbar-track-transparent flex flex-col pt-6">
+              <div className="flex gap-[4px] min-w-max">
                 {heatmapWeeks.map((week, i) => (
-                  <div key={i} className="flex flex-col gap-1.5">
-                    {week.map((date, j) => {
+                  <div key={i} className="flex flex-col gap-[4px] relative">
+                    {/* Month Label */}
+                    {week.monthLabel && (
+                      <div className="absolute -top-6 text-[0.65rem] font-medium text-[#9A9184] whitespace-nowrap">
+                        {week.monthLabel}
+                      </div>
+                    )}
+                    {/* Days */}
+                    {week.days.map((date, j) => {
                       const checkIn = checkIns.find(c => isSameLocalDay(new Date(c.created_at), date));
                       const isFuture = date > new Date();
                       
-                      let bg = "bg-[#F0EBE0]/60";
-                      let border = "";
+                      let bg = "bg-[#F3EDE2]"; // Softer, filled empty state instead of harsh borders
+                      let content = null;
+
                       if (checkIn) {
-                        if (checkIn.decision === "yes") bg = "bg-[#8A9A5B]";
-                        else if (checkIn.decision === "no") bg = "bg-[#7DA3B5]";
-                        else bg = "bg-[#9A9184]";
-                      } else if (!isFuture && date <= new Date()) {
-                        border = "border border-[#E6DFD2]";
-                        bg = "bg-transparent";
+                        if (checkIn.decision === "yes") {
+                          bg = "bg-transparent";
+                          content = <img src="/icon-yes.png" alt="Yes" className="w-[18px] h-[18px] object-contain drop-shadow-sm" />;
+                        } else if (checkIn.decision === "no") {
+                          bg = "bg-transparent";
+                          content = <img src="/icon-no.png" alt="No" className="w-[18px] h-[18px] object-contain drop-shadow-sm" />;
+                        } else {
+                          bg = "bg-[#9A9184]"; // Undecided
+                        }
                       } else if (isFuture) {
-                        bg = "bg-transparent opacity-30";
+                        bg = "bg-transparent";
                       }
 
                       return (
@@ -179,8 +198,10 @@ export default function HistoryPage() {
                           key={j} 
                           onClick={() => checkIn && handleDayClick(checkIn)}
                           title={date.toDateString()}
-                          className={`w-[14px] h-[14px] rounded-[3px] transition-transform ${bg} ${border} ${checkIn ? "cursor-pointer hover:scale-110 shadow-sm" : "cursor-default"}`}
-                        />
+                          className={`w-[18px] h-[18px] rounded-[4px] flex items-center justify-center transition-transform ${bg} ${checkIn ? "cursor-pointer hover:scale-110 shadow-sm" : "cursor-default"} ${isFuture ? "opacity-0" : ""}`}
+                        >
+                          {content}
+                        </div>
                       );
                     })}
                   </div>
@@ -190,13 +211,13 @@ export default function HistoryPage() {
             
             <div className="mt-6 flex flex-wrap justify-center gap-4 text-[0.65rem] text-[#8C8275] border-t border-[color:var(--sage-soft)]/30 pt-4">
               <div className="flex items-center gap-1.5">
-                <span className="block h-[10px] w-[10px] rounded-[2px] bg-[#8A9A5B]" /> Leaning Yes
+                <img src="/icon-yes.png" className="h-[12px] w-[12px] object-contain" alt="Yes" /> Leaning Yes
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="block h-[10px] w-[10px] rounded-[2px] bg-[#7DA3B5]" /> Leaning No
+                <img src="/icon-no.png" className="h-[12px] w-[12px] object-contain" alt="No" /> Leaning No
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="block h-[10px] w-[10px] rounded-[2px] bg-[#9A9184]" /> Undecided
+                <span className="block h-[12px] w-[12px] rounded-[3px] bg-[#9A9184]" /> Undecided
               </div>
             </div>
           </CardContent>
