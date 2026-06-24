@@ -22,7 +22,11 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="heading-serif text-xl text-[#3F3A33] mb-3">1. Information We Collect</h2>
             <p>
-              When you create an account with the Choice, we collect your email address. This is strictly used to authenticate your account and ensure your daily reflections are securely synced and backed up. Your reflection data (check-ins, decisions, and private notes) is stored securely.
+              The Choice offers two storage options: Local Only and Cloud Sync. 
+              <br/><br/>
+              <strong>Local Only Mode:</strong> We do not collect or store any information. Your check-ins, decisions, and private notes are saved entirely on your device's local storage and never leave your phone.
+              <br/><br/>
+              <strong>Cloud Sync Mode:</strong> When you create an account, we collect your email address to authenticate you. Your reflection data is securely stored in our encrypted database so it can sync across your devices.
             </p>
           </section>
 
@@ -36,14 +40,17 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="heading-serif text-xl text-[#3F3A33] mb-3">3. Data Security</h2>
             <p>
-              We implement strict, industry-standard security measures to protect your information. Your private reflections are protected by database Row Level Security (RLS), ensuring that only your authenticated account can access your personal data.
+              <strong>In Local Only Mode:</strong> Your data is protected by your device's built-in security features (e.g., Face ID, device passcode).<br/><br/>
+              <strong>In Cloud Sync Mode:</strong> We implement strict, industry-standard security measures. Your private reflections are protected by database Row Level Security (RLS), ensuring that only your authenticated account can access your personal data.
             </p>
           </section>
 
           <section>
             <h2 className="heading-serif text-xl text-[#3F3A33] mb-3">4. Deleting Your Data</h2>
             <p>
-              You have the absolute right to delete your personal information at any time. You can permanently delete your account and all associated reflection data directly within the app by navigating to <strong>Settings &gt; Delete my account</strong>. Once deleted, this data cannot be recovered.
+              You have the absolute right to delete your personal information at any time. <br/><br/>
+              <strong>In Cloud Sync Mode:</strong> You can permanently delete your account and all associated reflection data by navigating to <strong>Settings &gt; Delete my account</strong>.<br/><br/>
+              <strong>In Local Only Mode:</strong> You can clear your data via Settings, or simply delete the app from your device. Once deleted, local data cannot be recovered.
             </p>
           </section>
 

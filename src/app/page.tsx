@@ -35,6 +35,7 @@ import { supabase } from "@/lib/supabaseClient";
 import type { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { StorageService } from "@/lib/storage";
 
 type Desire = "yes" | "no" | "undecided" | null;
 
@@ -97,37 +98,27 @@ export default function Home() {
   const router = useRouter();
 
   const fetchData = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.replace("/auth"); return; }
-    setUser(user);
-
-    // Fetch all check-ins
-    const { data: checkIns } = await supabase
-      .from("daily_checkins")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-
-    if (checkIns) {
-      setHistory(checkIns.map(c => ({ decision: c.decision })));
-      // Find today's entry
-      const today = new Date();
-      const todayCheckIn = checkIns.find(c => isSameLocalDay(new Date(c.created_at), today));
-      if (todayCheckIn) {
-        setTodayEntry(todayCheckIn);
-        setDraftDesire(todayCheckIn.decision);
-        setSelectedTags(todayCheckIn.tags ?? []);
-        setNotes(todayCheckIn.notes ?? "");
-      }
+    const mode = StorageService.getMode();
+    if (mode === "cloud") {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { router.replace("/auth"); return; }
+      setUser(user);
+    } else {
+      setUser({ id: "local-user" } as any);
     }
 
-    // Fetch profile (display name + custom tags)
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("display_name, custom_tags")
-      .eq("id", user.id)
-      .single();
+    const checkIns = await StorageService.getCheckIns();
+    setHistory(checkIns.map(c => ({ decision: c.decision })));
+    const today = new Date();
+    const todayCheckIn = checkIns.find(c => isSameLocalDay(new Date(c.created_at), today));
+    if (todayCheckIn) {
+      setTodayEntry(todayCheckIn);
+      setDraftDesire(todayCheckIn.decision);
+      setSelectedTags(todayCheckIn.tags ?? []);
+      setNotes(todayCheckIn.notes ?? "");
+    }
 
+    const profile = await StorageService.getProfile();
     if (profile) {
       setDisplayName(profile.display_name ?? "");
       setCustomTags(profile.custom_tags ?? []);
@@ -141,7 +132,8 @@ export default function Home() {
   // Offline sync effect
   useEffect(() => {
     const syncOffline = async () => {
-      if (!navigator.onLine || !user) return;
+      const mode = StorageService.getMode();
+      if (mode !== "cloud" || !navigator.onLine || !user) return;
       const offlineStr = localStorage.getItem('offline_checkins');
       if (offlineStr) {
         const queue = JSON.parse(offlineStr);
@@ -241,7 +233,8 @@ export default function Home() {
     setSaveError(null);
 
     try {
-      if (!navigator.onLine) {
+      const mode = StorageService.getMode();
+      if (mode === "cloud" && !navigator.onLine) {
         const offlineQueue = JSON.parse(localStorage.getItem('offline_checkins') || '[]');
         const offlineEntry = { 
           id: todayEntry?.id || 'temp-' + Date.now(), 
@@ -261,26 +254,17 @@ export default function Home() {
         return;
       }
 
-      if (todayEntry) {
-        // UPDATE existing entry
-        const { error } = await supabase
-          .from("daily_checkins")
-          .update({ decision: desire, tags: selectedTags, notes: notes.trim() || null })
-          .eq("id", todayEntry.id);
-        if (error) throw error;
-        setTodayEntry({ ...todayEntry, decision: desire, tags: selectedTags, notes: notes.trim() || null });
-        toast.success("Check-in updated");
-      } else {
-        // INSERT new entry
-        const { data, error } = await supabase
-          .from("daily_checkins")
-          .insert({ user_id: user.id, decision: desire, tags: selectedTags, notes: notes.trim() || null })
-          .select()
-          .single();
-        if (error) throw error;
-        setTodayEntry(data);
-        setHistory(prev => [{ decision: desire }, ...prev]);
-        toast.success("Checked in ✓");
+      const saved = await StorageService.saveCheckIn({
+        id: todayEntry?.id,
+        decision: desire,
+        tags: selectedTags,
+        notes: notes.trim() || null
+      }, !!todayEntry);
+
+      if (saved) {
+        setTodayEntry(saved);
+        if (!todayEntry) setHistory(prev => [{ decision: desire }, ...prev]);
+        toast.success(todayEntry ? "Check-in updated" : "Checked in ✓");
       }
       setOpen(false);
     } catch {

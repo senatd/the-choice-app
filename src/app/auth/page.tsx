@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { StorageService } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,6 +26,7 @@ export default function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [resetSent, setResetSent] = useState(false);
   const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
+  const [showLocalWarning, setShowLocalWarning] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -37,6 +39,12 @@ export default function AuthPage() {
     };
     void checkSession();
   }, [router]);
+
+  const confirmLocalEntry = () => {
+    StorageService.setMode("local");
+    toast.success("Using App Offline");
+    router.replace("/");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -271,7 +279,45 @@ export default function AuthPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* ── Local Mode Entry ── */}
+        {!showLocalWarning && (
+          <div className="text-center pt-4 border-t border-[color:var(--sage-soft)]/50 mt-6">
+            <p className="text-[0.78rem] text-[#6F685E] mb-3">Prefer absolute privacy?</p>
+            <button
+              onClick={() => setShowLocalWarning(true)}
+              className="text-xs font-medium text-[#3F3A33] px-4 py-2 rounded-full border border-[#D9D2C5] bg-[#F5F0E8] hover:bg-[#EDE8DF] transition-colors"
+            >
+              Use App Offline / Local Only
+            </button>
+          </div>
+        )}
       </div>
+
+      {showLocalWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#FDFBF7]/80 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-xl ring-1 ring-black/5 text-center sm:text-left">
+            <h2 className="text-lg font-semibold text-[#3F3A33]">Use Local Only?</h2>
+            <p className="mt-2 text-sm text-[#6F685E] leading-relaxed">
+              In Local Mode, your data never leaves this device. <strong>However, if you delete the app, you will lose all the data permanently.</strong>
+            </p>
+            <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <button
+                onClick={() => setShowLocalWarning(false)}
+                className="rounded-full px-4 py-2 text-sm font-medium text-[#3F3A33] hover:bg-[#F0EBE0] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmLocalEntry}
+                className="rounded-full bg-[#8A9A5B] px-4 py-2 text-sm font-medium text-white hover:bg-[#788849] transition-colors"
+              >
+                Proceed Offline
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

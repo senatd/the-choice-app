@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { StorageService } from "@/lib/storage";
 import { Heart, Star, Loader2, Sparkles, Flame, CalendarDays, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
@@ -80,16 +81,15 @@ export default function InsightsPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.replace("/auth"); return; }
+      const mode = StorageService.getMode();
+      if (mode === "cloud") {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) { router.replace("/auth"); return; }
+      }
 
-      const { data, error } = await supabase
-        .from("daily_checkins")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: true });
-
-      if (!error && data) setCheckIns(data);
+      const data = await StorageService.getCheckIns();
+      // Insights expects chronological order (oldest first)
+      setCheckIns([...data].reverse());
       setIsLoading(false);
     };
     void fetchData();

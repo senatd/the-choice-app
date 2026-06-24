@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
+import { StorageService, StorageMode, CheckIn } from "@/lib/storage";
 import { useProfile } from "@/lib/useProfile";
 import { PremiumGate } from "@/components/PremiumGate";
 import {
@@ -184,15 +185,26 @@ export default function SettingsPage() {
   const [isDeletingData, setIsDeletingData] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
+  // Storage Mode
+  const [storageMode, setStorageMode] = useState<StorageMode>("cloud");
+  const [showDowngradeModal, setShowDowngradeModal] = useState(false);
+  const [isDowngrading, setIsDowngrading] = useState(false);
+
   // Advanced insights toggle
   const [advancedInsights, setAdvancedInsights] = useState(false);
 
   // Load user email + reminder prefs
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) { router.replace("/auth"); return; }
-      setUserEmail(user.email ?? "");
-    });
+    const mode = StorageService.getMode();
+    setStorageMode(mode);
+    if (mode === "cloud") {
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (!user) { router.replace("/auth"); return; }
+        setUserEmail(user.email ?? "");
+      });
+    } else {
+      setUserEmail("Local Offline User");
+    }
 
     // Restore reminder settings from localStorage
     const savedEnabled = localStorage.getItem("reminder_enabled");
@@ -213,18 +225,39 @@ export default function SettingsPage() {
   async function handleSaveDisplayName() {
     if (!profile) return;
     setIsSavingName(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({ display_name: displayName.trim() || null })
-      .eq("id", profile.id);
-    if (error) {
-      toast.error("Couldn't save name");
-    } else {
+    try {
+      await StorageService.updateProfile({ display_name: displayName.trim() || null });
       toast.success("Name updated!");
       setNameEditing(false);
       await refetch();
+    } catch {
+      toast.error("Couldn't save name");
     }
     setIsSavingName(false);
+  }
+
+  async function handleDowngrade() {
+    setIsDowngrading(true);
+    try {
+      const checkIns = await StorageService.getCheckIns();
+      const currentProfile = await StorageService.getProfile();
+      
+      await StorageService.deleteData();
+      StorageService.setMode("local");
+      
+      localStorage.setItem("local_checkins", JSON.stringify(checkIns));
+      if (currentProfile) {
+         localStorage.setItem("local_profile", JSON.stringify(currentProfile));
+      }
+      
+      setStorageMode("local");
+      setUserEmail("Local Offline User");
+      setShowDowngradeModal(false);
+      toast.success("Successfully downgraded to Local Only");
+    } catch (e) {
+      toast.error("Downgrade failed");
+    }
+    setIsDowngrading(false);
   }
 
   async function handleSignOut() {
@@ -308,51 +341,35 @@ export default function SettingsPage() {
     }
 
     setIsSavingTags(true);
-    const updatedTags = [...(profile.custom_tags ?? []), tag];
-    const { error } = await supabase
-      .from("profiles")
-      .update({ custom_tags: updatedTags })
-      .eq("id", profile.id);
-
-    if (error) {
-      toast.error("Couldn't save tag");
-    } else {
+    try {
+      const updatedTags = [...(profile.custom_tags ?? []), tag];
+      await StorageService.updateProfile({ custom_tags: updatedTags });
       setNewTag("");
       await refetch();
       toast.success(`"${tag}" added`);
+    } catch {
+      toast.error("Couldn't save tag");
     }
     setIsSavingTags(false);
   }
 
   async function handleRemoveTag(tag: string) {
     if (!profile) return;
-    const updatedTags = (profile.custom_tags ?? []).filter((t) => t !== tag);
-    const { error } = await supabase
-      .from("profiles")
-      .update({ custom_tags: updatedTags })
-      .eq("id", profile.id);
-
-    if (error) {
-      toast.error("Couldn't remove tag");
-    } else {
+    try {
+      const updatedTags = (profile.custom_tags ?? []).filter((t) => t !== tag);
+      await StorageService.updateProfile({ custom_tags: updatedTags });
       await refetch();
       toast(`"${tag}" removed`);
+    } catch {
+      toast.error("Couldn't remove tag");
     }
   }
 
   async function handleExportCSV() {
     setIsExporting(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from("daily_checkins")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: true });
-
-      if (error || !data) throw error;
+      const data = await StorageService.getCheckIns();
+      if (!data) throw new Error("No data");
 
       const rows = [
         ["Date", "Decision", "Tags", "Notes"],
@@ -386,21 +403,15 @@ export default function SettingsPage() {
   async function handleGeneratePDF() {
     setIsGeneratingPdf(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      let data = await StorageService.getCheckIns();
+      if (!data) throw new Error("No data");
 
       // Fetch last 90 days
       const since = new Date();
       since.setDate(since.getDate() - 90);
 
-      const { data, error } = await supabase
-        .from("daily_checkins")
-        .select("*")
-        .eq("user_id", user.id)
-        .gte("created_at", since.toISOString())
-        .order("created_at", { ascending: true });
-
-      if (error || !data) throw error;
+      data = data.filter(c => new Date(c.created_at) >= since);
+      data.reverse(); // ascending order for pdf
 
       // Dynamic import — jspdf is large, only load when needed
       const { jsPDF } = await import("jspdf");
@@ -534,39 +545,30 @@ export default function SettingsPage() {
 
   async function handleDeleteData() {
     setIsDeletingData(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { error } = await supabase
-      .from("daily_checkins")
-      .delete()
-      .eq("user_id", user.id);
-
-    if (error) {
-      toast.error("Couldn't delete data");
-    } else {
+    try {
+      if (storageMode === "cloud") {
+         const { data: { user } } = await supabase.auth.getUser();
+         if (user) await supabase.from("daily_checkins").delete().eq("user_id", user.id);
+      } else {
+         localStorage.removeItem("local_checkins");
+      }
       toast.success("All check-in data deleted");
       setShowDeleteDataModal(false);
+    } catch {
+      toast.error("Couldn't delete data");
     }
     setIsDeletingData(false);
   }
 
   async function handleDeleteAccount() {
     setIsDeletingAccount(true);
-    
-    // Call our secure database function to wipe the user and their data
-    const { error } = await supabase.rpc('delete_user');
-
-    if (error) {
-      toast.error("Couldn't delete account. Please try again.");
-      setIsDeletingAccount(false);
-      return;
+    try {
+      await StorageService.deleteData();
+      toast.success("Account and data completely deleted");
+      router.replace("/auth");
+    } catch {
+      toast.error("Couldn't delete account");
     }
-
-    // Sign out to clear local session
-    await supabase.auth.signOut();
-    toast.success("Account and data completely deleted");
-    router.replace("/auth");
     setIsDeletingAccount(false);
   }
 
@@ -863,6 +865,42 @@ export default function SettingsPage() {
           </PremiumGate>
         </Section>
 
+        {/* ── Data & Privacy ── */}
+        <Section title="Data & Privacy">
+           <div className="px-4 py-3.5 border-b border-[#F0EBE0]">
+              <p className="text-sm text-[#3F3A33]">
+                Current Mode: <span className="font-semibold">{storageMode === "cloud" ? "Cloud Sync" : "Local Only"}</span>
+              </p>
+           </div>
+           {storageMode === "local" ? (
+             <button
+                onClick={() => router.push("/auth?upgrade=true")}
+                className="w-full text-left transition-colors hover:bg-[#F5F0E8] active:bg-[#EDE8DF]"
+              >
+                <SettingRow
+                  icon={Sparkles}
+                  label="Upgrade to Cloud Sync"
+                  sublabel="Back up your data across devices"
+                >
+                  <ChevronRight className="h-4 w-4 text-[#9A9184]" />
+                </SettingRow>
+              </button>
+           ) : (
+             <button
+                onClick={() => setShowDowngradeModal(true)}
+                className="w-full text-left transition-colors hover:bg-[#F5F0E8] active:bg-[#EDE8DF]"
+              >
+                <SettingRow
+                  icon={Download}
+                  label="Downgrade to Local Only"
+                  sublabel="Delete cloud account and keep data on this device"
+                >
+                  <ChevronRight className="h-4 w-4 text-[#9A9184]" />
+                </SettingRow>
+              </button>
+           )}
+        </Section>
+
         {/* ── About ── */}
         <Section title="About">
           <Link
@@ -937,6 +975,15 @@ export default function SettingsPage() {
         onConfirm={() => void handleDeleteAccount()}
         onCancel={() => setShowDeleteAccountModal(false)}
         isLoading={isDeletingAccount}
+      />
+      <ConfirmModal
+        isOpen={showDowngradeModal}
+        title="Downgrade to Local Only?"
+        message="This will download all your cloud data to this device, and then permanently delete your cloud account from our servers."
+        confirmLabel="Downgrade to Local"
+        onConfirm={() => void handleDowngrade()}
+        onCancel={() => setShowDowngradeModal(false)}
+        isLoading={isDowngrading}
       />
     </main>
   );

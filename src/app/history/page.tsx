@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { StorageService } from "@/lib/storage";
 import type { User } from "@supabase/supabase-js";
 import { 
   CalendarClock, 
@@ -47,19 +48,17 @@ export default function HistoryPage() {
 
   useEffect(() => {
     const fetchHistory = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.replace("/auth"); return; }
-      setUser(user);
-
-      const { data, error } = await supabase
-        .from("daily_checkins")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-
-      if (!error && data) {
-        setCheckIns(data);
+      const mode = StorageService.getMode();
+      if (mode === "cloud") {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) { router.replace("/auth"); return; }
+        setUser(user);
+      } else {
+        setUser({ id: "local-user" } as any);
       }
+
+      const data = await StorageService.getCheckIns();
+      setCheckIns(data);
       setIsLoading(false);
     };
 

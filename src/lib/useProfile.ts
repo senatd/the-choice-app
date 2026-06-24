@@ -1,14 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { supabase } from "./supabaseClient";
+import { StorageService, UserProfile } from "./storage";
 
-export type Profile = {
-  id: string;
-  display_name: string | null;
-  is_premium: boolean;
-  custom_tags: string[];
-};
+export type Profile = UserProfile;
 
 type UseProfileReturn = {
   profile: Profile | null;
@@ -27,38 +22,8 @@ export function useProfile(): UseProfileReturn {
     setError(null);
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        setProfile(null);
-        return;
-      }
-
-      const { data, error: fetchError } = await supabase
-        .from("profiles")
-        .select("id, display_name, is_premium, custom_tags")
-        .eq("id", user.id)
-        .single();
-
-      if (fetchError) {
-        // If no profile row exists yet (e.g. trigger hasn't fired), create one
-        if (fetchError.code === "PGRST116") {
-          const { data: newProfile, error: insertError } = await supabase
-            .from("profiles")
-            .insert({ id: user.id })
-            .select("id, display_name, is_premium, custom_tags")
-            .single();
-
-          if (insertError) throw insertError;
-          setProfile(newProfile);
-        } else {
-          throw fetchError;
-        }
-      } else {
-        setProfile(data);
-      }
+      const data = await StorageService.getProfile();
+      setProfile(data);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load profile");
     } finally {
