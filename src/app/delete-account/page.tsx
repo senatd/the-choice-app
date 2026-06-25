@@ -5,6 +5,7 @@ import { Loader2, CheckCircle2 } from "lucide-react";
 
 export default function DeleteAccountPage() {
   const [email, setEmail] = useState("");
+  const [requestType, setRequestType] = useState("account");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -18,7 +19,7 @@ export default function DeleteAccountPage() {
       const res = await fetch("/api/delete-account", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, type: requestType }),
       });
       
       if (!res.ok) {
@@ -74,25 +75,44 @@ export default function DeleteAccountPage() {
             <div>
               <p className="text-sm font-medium text-green-900 mb-1">Request Received</p>
               <p className="text-sm text-green-700 leading-relaxed">
-                We have received your account deletion request. Your account and all associated data will be manually deleted within 14 days.
+                We have received your {requestType === 'account' ? 'account deletion' : 'data deletion'} request. It will be manually processed within 14 days.
               </p>
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="mt-2 flex flex-col gap-3 max-w-sm">
-            <label htmlFor="email" className="text-xs font-medium text-[#3F3A33] uppercase tracking-wide">
-              Account Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
-              disabled={isLoading}
-              className="rounded-xl border border-[#E0D7C7] bg-white px-4 py-2.5 text-[0.95rem] text-[#3F3A33] outline-none focus:border-[#8A9A5B] disabled:opacity-50"
-            />
+          <form onSubmit={handleSubmit} className="mt-2 flex flex-col gap-4 max-w-sm">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="email" className="text-xs font-medium text-[#3F3A33] uppercase tracking-wide">
+                Account Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+                disabled={isLoading}
+                className="rounded-xl border border-[#E0D7C7] bg-white px-4 py-2.5 text-[0.95rem] text-[#3F3A33] outline-none focus:border-[#8A9A5B] disabled:opacity-50"
+              />
+            </div>
+            
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="type" className="text-xs font-medium text-[#3F3A33] uppercase tracking-wide">
+                What would you like to delete?
+              </label>
+              <select
+                id="type"
+                value={requestType}
+                onChange={(e) => setRequestType(e.target.value)}
+                disabled={isLoading}
+                className="rounded-xl border border-[#E0D7C7] bg-white px-4 py-2.5 text-[0.95rem] text-[#3F3A33] outline-none focus:border-[#8A9A5B] disabled:opacity-50 appearance-none"
+              >
+                <option value="account">Delete Entire Account & All Data</option>
+                <option value="data">Delete All Data (Keep Account)</option>
+              </select>
+            </div>
+
             {errorMsg && (
               <p className="text-sm text-red-500">{errorMsg}</p>
             )}

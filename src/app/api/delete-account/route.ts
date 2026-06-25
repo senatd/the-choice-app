@@ -9,7 +9,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function POST(request: Request) {
   try {
-    const { email } = await request.json();
+    const { email, type } = await request.json();
 
     if (!email || !email.includes('@')) {
       return NextResponse.json(
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
     const { error } = await supabaseAdmin
       .from('deletion_requests')
-      .insert([{ email }]);
+      .insert([{ email, request_type: type || 'account' }]);
 
     if (error) {
       console.error('Error inserting deletion request:', error);
