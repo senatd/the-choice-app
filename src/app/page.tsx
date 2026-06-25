@@ -89,9 +89,13 @@ export default function Home() {
 
   useEffect(() => {
     const hours = new Date().getHours();
-    setGreetingTimeOfDay(
-      hours < 12 ? "Good morning" : hours < 18 ? "Good afternoon" : "Good evening"
-    );
+    if (hours >= 5 && hours < 12) {
+      setGreetingTimeOfDay("Good morning");
+    } else if (hours >= 12 && hours < 18) {
+      setGreetingTimeOfDay("Good afternoon");
+    } else {
+      setGreetingTimeOfDay("Good evening");
+    }
   }, []);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
