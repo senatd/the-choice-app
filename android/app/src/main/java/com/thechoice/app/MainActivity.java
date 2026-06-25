@@ -1,4 +1,4 @@
-package com.babychoice.app;
+package com.thechoice.app;
 
 import com.getcapacitor.BridgeActivity;
 

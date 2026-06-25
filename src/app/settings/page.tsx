@@ -967,20 +967,22 @@ export default function SettingsPage() {
             </SettingRow>
           </button>
 
-          <button
-            id="delete-account-btn"
-            onClick={() => setShowDeleteAccountModal(true)}
-            className="w-full text-left transition-colors hover:bg-red-50/50 active:bg-red-50"
-          >
-            <SettingRow
-              icon={Trash2}
-              label="Delete my account"
-              sublabel="Removes your account and all data forever"
-              danger
+          {storageMode === "cloud" && (
+            <button
+              id="delete-account-btn"
+              onClick={() => setShowDeleteAccountModal(true)}
+              className="w-full text-left transition-colors hover:bg-red-50/50 active:bg-red-50"
             >
-              <ChevronRight className="h-4 w-4 text-red-400" />
-            </SettingRow>
-          </button>
+              <SettingRow
+                icon={Trash2}
+                label="Delete my account"
+                sublabel="Removes your account and all data forever"
+                danger
+              >
+                <ChevronRight className="h-4 w-4 text-red-400" />
+              </SettingRow>
+            </button>
+          )}
         </Section>
 
         {/* App version */}

@@ -247,7 +247,7 @@ export default function Home() {
         localStorage.setItem('offline_checkins', JSON.stringify(offlineQueue));
         
         setTodayEntry(offlineEntry as any);
-        if (!todayEntry) setHistory(prev => [{ decision: desire }, ...prev]);
+        setHistory(prev => !todayEntry ? [{ decision: desire }, ...prev] : [{ decision: desire }, ...prev.slice(1)]);
         
         toast.success("Saved offline. Will sync when reconnected.");
         setOpen(false);
@@ -263,7 +263,7 @@ export default function Home() {
 
       if (saved) {
         setTodayEntry(saved);
-        if (!todayEntry) setHistory(prev => [{ decision: desire }, ...prev]);
+        setHistory(prev => !todayEntry ? [{ decision: desire }, ...prev] : [{ decision: desire }, ...prev.slice(1)]);
         toast.success(todayEntry ? "Check-in updated" : "Checked in ✓");
       }
       setOpen(false);
