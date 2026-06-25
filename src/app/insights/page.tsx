@@ -88,8 +88,21 @@ export default function InsightsPage() {
       }
 
       const data = await StorageService.getCheckIns();
+      
+      // Keep only the latest check-in for each calendar day across all charts
+      const uniqueDaysMap = new Map<string, CheckIn>();
+      const sortedData = [...data].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      
+      sortedData.forEach(c => {
+        const d = new Date(c.created_at);
+        const key = d.toLocaleDateString();
+        uniqueDaysMap.set(key, c); // Overwrites older check-ins from the same day
+      });
+      
+      const deduplicatedData = Array.from(uniqueDaysMap.values());
+
       // Insights expects chronological order (oldest first)
-      setCheckIns([...data].reverse());
+      setCheckIns(deduplicatedData);
       setIsLoading(false);
     };
     void fetchData();
