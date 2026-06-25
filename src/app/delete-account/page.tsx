@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Loader2, CheckCircle2 } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function DeleteAccountPage() {
   const [email, setEmail] = useState("");
@@ -16,13 +17,12 @@ export default function DeleteAccountPage() {
     setErrorMsg("");
     
     try {
-      const res = await fetch("/api/delete-account", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, type: requestType }),
-      });
+      const { error } = await supabase
+        .from('deletion_requests')
+        .insert([{ email, request_type: requestType }]);
       
-      if (!res.ok) {
+      if (error) {
+        console.error("Supabase error:", error);
         throw new Error("Failed to submit request.");
       }
       
