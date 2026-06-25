@@ -20,8 +20,9 @@ export default function DeleteAccountPage() {
         <ol className="list-decimal pl-5 space-y-2 text-[0.9rem] text-[#6F685E]">
           <li>Open <strong>The Choice</strong> app on your device.</li>
           <li>Tap on the <strong>Settings</strong> icon.</li>
-          <li>Scroll down to the Storage section and tap <strong>Downgrade to Local Only</strong>.</li>
-          <li>Confirm your choice. This will instantly destroy your cloud account, deleting your email, password, and all associated journal entries from our servers.</li>
+          <li>Scroll to the very bottom to the <strong>Danger Zone</strong> section.</li>
+          <li>Tap <strong>Delete my account</strong>.</li>
+          <li>Confirm your choice. This will instantly and permanently destroy your account and all associated data (both cloud and local) from our systems.</li>
         </ol>
       </section>
 
