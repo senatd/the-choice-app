@@ -48,25 +48,25 @@ export function BottomNav() {
           icon={Sparkles}
           label="Today"
           href="/"
-          active={pathname === "/"}
+          active={pathname === "/" || pathname === "/index.html"}
         />
         <NavItem
           icon={CalendarClock}
           label="History"
           href="/history"
-          active={pathname === "/history"}
+          active={pathname?.startsWith("/history")}
         />
         <NavItem
           icon={BarChart2}
           label="Insights"
           href="/insights"
-          active={pathname === "/insights"}
+          active={pathname?.startsWith("/insights")}
         />
         <NavItem
           icon={Settings}
           label="Settings"
           href="/settings"
-          active={pathname === "/settings"}
+          active={pathname?.startsWith("/settings")}
         />
       </div>
     </nav>
