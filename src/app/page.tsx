@@ -550,20 +550,20 @@ export default function Home() {
                 Daily nugget
               </CardTitle>
               <CardDescription>
-                A rotating note on the challenge and joy of parenting.
+                A daily reflection on parenting, identity, and the childfree life.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="inline-flex items-center gap-2 rounded-full bg-[#FBF7EE] px-3 py-1 text-[0.7rem] font-medium uppercase tracking-[0.18em] text-[#6F685E] border border-[color:var(--sage-soft)]/80">
-                {nugget.type === "joy" ? (
+                {nugget.icon === "heart" ? (
                   <>
                     <Heart className="h-3.5 w-3.5 text-[#C46A4A]" />
-                    <span>Joy of parenting</span>
+                    <span>{nugget.tag}</span>
                   </>
                 ) : (
                   <>
                     <Brain className="h-3.5 w-3.5 text-[#8A9A5B]" />
-                    <span>Reality check</span>
+                    <span>{nugget.tag}</span>
                   </>
                 )}
               </div>

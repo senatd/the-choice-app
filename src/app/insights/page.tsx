@@ -188,27 +188,46 @@ export default function InsightsPage() {
 
   // Consistency stats
   const consistency = useMemo(() => {
-    const total = checkIns.length;
+    // Deduplicate by local date string
+    const uniqueDateKeys = new Set<string>();
+    const deduplicatedCheckIns = [];
+    for (const c of checkIns) {
+      const d = new Date(c.created_at);
+      const key = d.toDateString();
+      if (!uniqueDateKeys.has(key)) {
+        uniqueDateKeys.add(key);
+        deduplicatedCheckIns.push(c);
+      }
+    }
+
+    const total = deduplicatedCheckIns.length;
     if (total === 0) return { total: 0, streak: 0, bestMonth: "—" };
 
     // Current streak
-    const sorted = [...checkIns].sort((a, b) =>
+    const sorted = [...deduplicatedCheckIns].sort((a, b) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
     let streak = 0;
     let prev = new Date();
     prev.setHours(0, 0, 0, 0);
-    for (const c of sorted) {
-      const d = new Date(c.created_at);
-      d.setHours(0, 0, 0, 0);
-      const diff = (prev.getTime() - d.getTime()) / (1000 * 60 * 60 * 24);
-      if (diff <= 1) { streak++; prev = d; }
-      else break;
+    
+    const firstDate = new Date(sorted[0].created_at);
+    firstDate.setHours(0, 0, 0, 0);
+    const diffToToday = (prev.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24);
+    
+    if (diffToToday <= 1) {
+      for (const c of sorted) {
+        const d = new Date(c.created_at);
+        d.setHours(0, 0, 0, 0);
+        const diff = (prev.getTime() - d.getTime()) / (1000 * 60 * 60 * 24);
+        if (diff <= 1) { streak++; prev = d; }
+        else break;
+      }
     }
 
     // Best month
     const monthCounts: Record<string, number> = {};
-    checkIns.forEach(c => {
+    deduplicatedCheckIns.forEach(c => {
       const label = new Date(c.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" });
       monthCounts[label] = (monthCounts[label] || 0) + 1;
     });
