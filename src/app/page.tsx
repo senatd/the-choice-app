@@ -85,6 +85,14 @@ function isSameLocalDay(dateA: Date, dateB: Date): boolean {
 export default function Home() {
   const [todayEntry, setTodayEntry] = useState<CheckIn | null>(null);
   const [draftDesire, setDraftDesire] = useState<Desire>(null);
+  const [greetingTimeOfDay, setGreetingTimeOfDay] = useState("Good morning");
+
+  useEffect(() => {
+    const hours = new Date().getHours();
+    setGreetingTimeOfDay(
+      hours < 12 ? "Good morning" : hours < 18 ? "Good afternoon" : "Good evening"
+    );
+  }, []);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
   const [history, setHistory] = useState<{ decision: string }[]>([]);
@@ -275,9 +283,6 @@ export default function Home() {
   };
 
   const greetingName = displayName || "there";
-  const hours = new Date().getHours();
-  const greetingTimeOfDay =
-    hours < 12 ? "Good morning" : hours < 18 ? "Good afternoon" : "Good evening";
 
   const desireLabel =
     todayEntry?.decision === "yes"

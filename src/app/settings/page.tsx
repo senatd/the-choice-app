@@ -640,19 +640,19 @@ export default function SettingsPage() {
                       onChange={(e) => setDisplayName(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") void handleSaveDisplayName(); }}
                       placeholder="Your name"
-                      className="flex-1 rounded-xl border border-[#E0D7C7] bg-white px-3 py-1.5 text-sm text-[#3F3A33] outline-none focus:border-[#8A9A5B]"
+                      className="min-w-0 flex-1 rounded-xl border border-[#E0D7C7] bg-white px-3 py-1.5 text-sm text-[#3F3A33] outline-none focus:border-[#8A9A5B]"
                       autoFocus
                     />
                     <button
                       onClick={() => void handleSaveDisplayName()}
                       disabled={isSavingName}
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-[#8A9A5B] text-white disabled:opacity-50"
+                      className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#8A9A5B] text-white disabled:opacity-50"
                     >
                       {isSavingName ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
                     </button>
                     <button
                       onClick={() => { setNameEditing(false); setDisplayName(profile?.display_name ?? ""); }}
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F0EBE0] text-[#6F685E]"
+                      className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#F0EBE0] text-[#6F685E]"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
