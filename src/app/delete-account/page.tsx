@@ -1,4 +1,38 @@
+"use client";
+
+import { useState } from "react";
+import { Loader2, CheckCircle2 } from "lucide-react";
+
 export default function DeleteAccountPage() {
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrorMsg("");
+    
+    try {
+      const res = await fetch("/api/delete-account", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      
+      if (!res.ok) {
+        throw new Error("Failed to submit request.");
+      }
+      
+      setIsSuccess(true);
+      setEmail("");
+    } catch (err: any) {
+      setErrorMsg("An error occurred. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-4 py-12 sm:px-6 sm:py-20">
       <header className="flex flex-col gap-3 border-b border-[color:var(--sage-soft)]/50 pb-8">
@@ -24,6 +58,60 @@ export default function DeleteAccountPage() {
           <li>Tap <strong>Delete my account</strong>.</li>
           <li>Confirm your choice. This will instantly and permanently destroy your account and all associated data (both cloud and local) from our systems.</li>
         </ol>
+      </section>
+
+      <section className="flex flex-col gap-4 py-4 border-t border-[color:var(--sage-soft)]/30">
+        <h2 className="heading-serif text-xl font-medium text-[#3F3A33]">
+          Option 2: Web Request
+        </h2>
+        <p className="text-[0.9rem] leading-relaxed text-[#6F685E]">
+          If you have already uninstalled the app and wish to delete your account, you can submit a deletion request below using the email address associated with your account.
+        </p>
+        
+        {isSuccess ? (
+          <div className="mt-2 rounded-xl bg-green-50 border border-green-200 p-5 flex items-start gap-3">
+            <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-green-900 mb-1">Request Received</p>
+              <p className="text-sm text-green-700 leading-relaxed">
+                We have received your account deletion request. Your account and all associated data will be manually deleted within 14 days.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="mt-2 flex flex-col gap-3 max-w-sm">
+            <label htmlFor="email" className="text-xs font-medium text-[#3F3A33] uppercase tracking-wide">
+              Account Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              required
+              disabled={isLoading}
+              className="rounded-xl border border-[#E0D7C7] bg-white px-4 py-2.5 text-[0.95rem] text-[#3F3A33] outline-none focus:border-[#8A9A5B] disabled:opacity-50"
+            />
+            {errorMsg && (
+              <p className="text-sm text-red-500">{errorMsg}</p>
+            )}
+            <button
+              type="submit"
+              disabled={isLoading || !email.trim()}
+              className="mt-1 flex items-center justify-center gap-2 rounded-xl bg-[#8A9A5B] px-4 py-3 text-[0.95rem] font-medium text-white transition-colors hover:bg-[#7A8A4B] active:bg-[#6A7A3B] disabled:opacity-50"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit Deletion Request"
+              )}
+            </button>
+          </form>
+        )}
       </section>
 
       <section className="mt-8 rounded-xl bg-[#FBF7EE] p-5 text-[0.85rem] text-[#8C8275] border border-[#E6DFD2]">
